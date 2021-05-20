@@ -24,21 +24,24 @@ So you need to monitor APYs on your different trusted assets, it takes time and 
 ### Here is Nabe
 
 Nabe is a smart contract where you can put your usdc, and say what are your trusted assets.
-Nabe will chase APY's for you against a small performance fees and respect your assets allocations.
+Nabe will chase APY's for you against performance fees and respect your assets allocations.
 
-### Rebalance
+### How it works
 
-Nabe is a smart contract so it needs people to call it every day, to rebalance all pairs.
-But as we said previously layer 1 gas cost are huge and if a rebalance needs to check all pairs, calculating best APYs will cost a lot of gas.
+Nabe is only the security contract, that verify allocations.
+Most of the work is done off chain by the chef 👩‍🍳
 
-Nabe use 2 mecanisms to reduce gas costs :
+The chef is an address chosen by the lender when lending tokens, there can be multiple chefs that compete with each other to attract more users and so they get more fees.
+Indeed when you become a chef, you set your performance fees, it can be 5% or 50% its up to you !
+But keep in mind that if one of your lenders is not happy with your performances he can choose a new one !
 
-- Give rewards to users that call for a rebalance, that's why the performance fees are for, and because it's a vault when you rebalance pairs in common with other users, you share this performance fees and get enough fees to make it profitable for someone to call a rebalance.
-- Reduce logic inside the contract, the user will submit an array with new allocations between all pairs and Nabe will only check if APYs are better than the actual ones and if it respects risk setted by depositors.
+When you are a chef you calculate the best recipe for your users off chain and then call Nabe to rebalance what's needs to be rabalanced (for example move 10% usdc from KmETH to kmYFI).
+If the new allocation don't respect your users ones, Nabe will refuse it !
 
 ## Diagram
 
-![Nabe 1 (1)](https://user-images.githubusercontent.com/80489471/119013142-ffa26d80-b996-11eb-827a-b3d78b89315a.png)
+![Nabe](https://user-images.githubusercontent.com/80489471/119029658-34b7bb80-b9a9-11eb-806a-a8ec945dc0d8.png)
+
 
 
 
