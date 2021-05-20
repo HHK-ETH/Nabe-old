@@ -31,7 +31,14 @@ Nabe will chase APY's for you against a small performance fees and respect your 
 Nabe is a smart contract so it needs people to call it every day, to rebalance all pairs.
 But as we said previously layer 1 gas cost are huge and if a rebalance needs to check all pairs, calculating best APYs will cost a lot of gas.
 
-There is 2 ways to resolve this :
+Nabe use 2 mecanisms to reduce gas costs :
 
 - Give rewards to users that call for a rebalance, that's why the performance fees are for, and because it's a vault when you rebalance pairs in common with other users, you share this performance fees and get enough fees to make it profitable for someone to call a rebalance.
 - Reduce logic inside the contract, the user will submit an array with new allocations between all pairs and Nabe will only check if APYs are better than the actual ones and if it respects risk setted by depositors.
+
+## Diagram
+
+![Nabe 1 (1)](https://user-images.githubusercontent.com/80489471/119013142-ffa26d80-b996-11eb-827a-b3d78b89315a.png)
+
+
+
