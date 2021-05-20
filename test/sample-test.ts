@@ -1,8 +1,9 @@
-const { expect } = require("chai");
+import {expect} from "chai";
+const hre = require("hardhat");
 
 describe("Greeter", function() {
   it("Should return the new greeting once it's changed", async function() {
-    const Greeter = await ethers.getContractFactory("Greeter");
+    const Greeter = await hre.ethers.getContractFactory("Greeter");
     const greeter = await Greeter.deploy("Hello, world!");
     
     await greeter.deployed();
