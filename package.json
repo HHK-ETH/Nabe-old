@@ -1,0 +1,27 @@
+{
+  "name": "nabe",
+  "version": "1.0.0",
+  "description": "Nabe is a liquidity aggregator for for kashi.\r It chase APYs between all pairs following the rules set by users that deposited liquidity inside.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HHK-ETH/Nabe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HHK-ETH/Nabe/issues"
+  },
+  "homepage": "https://github.com/HHK-ETH/Nabe#readme",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.3.0",
+    "ethers": "^5.1.4",
+    "hardhat": "^2.3.0"
+  }
+}
