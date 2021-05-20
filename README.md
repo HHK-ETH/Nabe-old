@@ -9,7 +9,7 @@ Kashi is one of the best lending solution in the market right now. It Allows you
 
 It brings another cool feature, because risks are isolated you can create a pair for every asset and collateral you want (as long as an oracle price is available for them).
 
-But there is major problem, because everything is isolated if you want to lend on multiple pairs, you'll need to monitor them because to allways get the best APY.
+But there is major problem, because everything is isolated if you want to lend on multiple pairs, you'll need to monitor them to allways get the best APY.
 
 ### Example
 
