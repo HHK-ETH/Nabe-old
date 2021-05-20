@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/80489471/119045961-6a19d480-b9bc-11eb-9cd3-b499a9d7ec0e.png"/>
+</div>
+
 # Nabe - liquidity aggregator for kashi
 
 Nabe is a liquidity aggregator for kashi.
