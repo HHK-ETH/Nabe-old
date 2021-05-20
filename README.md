@@ -1,6 +1,6 @@
 # Nabe - liquidity aggregator for kashi
 
-Nabe is a liquidity aggregator for for kashi.
+Nabe is a liquidity aggregator for kashi.
 It chase APYs between all pairs following the rules set by users that deposited liquidity inside.
 
 ## Why use Nabe ?
