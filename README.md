@@ -18,7 +18,7 @@ You trust ETH and YFI and have 1k USDC :
 Lend APY on ETH is 10% and 3% on YFI.
 So you will probably lend 1k USDC in the ETH pair.
 
-It's a good idea but as utilization will go down because you provided liquidity, in few hours/days ETH APY will be lower than the YFI one.
+It's a good idea but as utilization will go down because you provided liquidity, in few hours/days ETH APY will probably be lower than the YFI one.
 And you will need to rebalance it !
 So you need to monitor every days APYs on you different trusted assets, it takes time and have a cost in gas especially on layer 1.
 
