@@ -1,6 +1,7 @@
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/80489471/119045961-6a19d480-b9bc-11eb-9cd3-b499a9d7ec0e.png"/>
+  <img src="https://user-images.githubusercontent.com/80489471/119342669-b2bfdf00-bc95-11eb-880f-107bfad17a55.gif"/>
 </div>
+
 
 # Nabe - liquidity aggregator for kashi
 
