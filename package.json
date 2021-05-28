@@ -27,6 +27,8 @@
     "ethers": "^5.1.4",
     "hardhat": "^2.3.0",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.4"
+    "typescript": "^4.2.4",
+    "@boringcrypto/boring-solidity": "git+https://github.com/boringcrypto/BoringSolidity.git",
+    "@sushiswap/bentobox-sdk": "git+https://github.com/sushiswap/bentobox-sdk.git"
   }
 }
