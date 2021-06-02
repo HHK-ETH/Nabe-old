@@ -12,17 +12,9 @@ contract Nabe {
 
     string public name;
 
-    struct User {
-        mapping (address => uint256) tokenAmount;
-    }
+    mapping (address => mapping (address => uint256)) public userTokens;
 
-    mapping (address => User) private userTokens;
-
-    struct Token {
-        mapping (address => uint) collateralMaxAmount;
-    }
-
-    mapping (address => Token) private tokens;
+    mapping (address => mapping (address => uint)) public tokens;
 
     constructor(string memory _name) public {
         name = _name;
@@ -42,10 +34,9 @@ contract Nabe {
     }
 
     //update maxAmount per collaterals
-    //todo limit maxAmount of user so he can't set a maxAmount superior to his deposit
-    function updateMaxAmountPerCollateral(address _token, address[] calldata _collaterals, uint256[] calldata _maxAmounts) view private {
+    function updateMaxAmountPerCollateral(address _token, address[] calldata _collaterals, uint256[] calldata _maxAmounts) private {
         for (uint256 i = 0; i < _collaterals.length; i += 1) {
-            tokens[_token].collateralMaxAmount[_collaterals[i]].add(_maxAmounts[i]);
+            tokens[_token][_collaterals[i]] = tokens[_token][_collaterals[i]].add(_maxAmounts[i]);
         }
     }
 
