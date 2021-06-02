@@ -43,7 +43,7 @@ describe("Nabe", function () {
     });
 
     describe('Should deposit into Nabe', async function () {
-        it('Should revert a deposit because not approved or superior to wallet balance', async function () {
+        it('Should revert a deposit when not approved or superior to wallet balance', async function () {
             const collateralsMaxAmounts = collaterals.map(() => {
                 return 100; //equal to the deposit amount
             });
@@ -92,5 +92,27 @@ describe("Nabe", function () {
                 await expect(nabe.deposit(asset.address, depositAmount, collateralsAddresses, collateralsMaxAmounts)).to.be.revertedWith('Max amount can not exceed your balance');
             }));
         });
+    });
+
+    describe('Should remove from Nabe', async function() {
+            it('Should revert remove assets from Nabe when _amount superior to userToken balance', async function () {
+                // @ts-ignore
+                await Promise.all(assets.map(async (asset) => {
+                    const [owner] = await hre.ethers.getSigners();
+                    const assetInNabe = await nabe.userTokens(asset.address, owner.address);
+                    // @ts-ignore
+                    await expect(nabe.remove(asset.address, assetInNabe+1)).to.be.revertedWith('_amount can not be superior to the userToken amount');
+                }));
+            });
+            it('Should remove assets from Nabe', async function () {
+                await Promise.all(assets.map(async (asset) => {
+                    const [owner] = await hre.ethers.getSigners();
+                    const assetInNabe = await nabe.userTokens(asset.address, owner.address);
+
+                    expect(await nabe.userTokens(asset.address, owner.address)).to.equal(assetInNabe);
+                    await nabe.remove(asset.address, assetInNabe);
+                    expect(await nabe.userTokens(asset.address, owner.address)).to.equal(0);
+                }));
+            });
     });
 });
