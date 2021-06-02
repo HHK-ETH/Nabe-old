@@ -43,6 +43,19 @@ describe("Nabe", function () {
     });
 
     describe('Should deposit into Nabe', async function () {
+        it('Should revert a deposit because not approved or superior to wallet balance', async function () {
+            const collateralsMaxAmounts = collaterals.map(() => {
+                return 100; //equal to the deposit amount
+            });
+            const collateralsAddresses = collaterals.map((collateral) => {
+                return collateral.address;
+            });
+            // @ts-ignore
+            await expect(nabe.deposit(assets[0].address, 100, collateralsAddresses, collateralsMaxAmounts)).to.be.revertedWith('BoringERC20: TransferFrom failed');
+            // @ts-ignore
+            await expect(nabe.deposit(assets[0].address, 1_000_000_000_000, collateralsAddresses, collateralsMaxAmounts)).to.be.revertedWith('BoringERC20: TransferFrom failed');
+        });
+
         it('Should approve assets', async function () {
             const [owner] = await hre.ethers.getSigners();
             await Promise.all(assets.map(async (asset) => {
