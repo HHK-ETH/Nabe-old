@@ -52,7 +52,7 @@ describe("Nabe", function () {
             }));
         });
 
-        it('Should deposit asset and set a valid max for all collaterals', async function () {
+        it('Should deposit assets and set a valid max for all collaterals', async function () {
             const depositAmount: number = 100;
             const collateralsAddresses = collaterals.map((collateral) => {
                 return collateral.address;
@@ -60,11 +60,13 @@ describe("Nabe", function () {
             const collateralsMaxAmounts = collaterals.map(() => {
                 return 100; //equal to the deposit amount
             });
-            await nabe.deposit(assets[0].address, depositAmount, collateralsAddresses, collateralsMaxAmounts);
-            expect(await nabe.tokens(assets[0].address, collateralsAddresses[0])).to.equal(depositAmount);
+            await Promise.all(assets.map(async (asset) => {
+                await nabe.deposit(asset.address, depositAmount, collateralsAddresses, collateralsMaxAmounts);
+                expect(await nabe.tokens(asset.address, collateralsAddresses[0])).to.equal(depositAmount);
+            }));
         });
 
-        it('Should revert a deposit asset when setting an invalid max for all collaterals', async function () {
+        it('Should revert a deposit assets when setting an invalid max for all collaterals', async function () {
             const depositAmount: number = 100;
             const collateralsAddresses = collaterals.map((collateral) => {
                 return collateral.address;
@@ -72,8 +74,10 @@ describe("Nabe", function () {
             const collateralsMaxAmounts = collaterals.map(() => {
                 return 1_000_000; //more than the deposits amount /!\
             });
-            // @ts-ignore
-            await expect(nabe.deposit(assets[0].address, depositAmount, collateralsAddresses, collateralsMaxAmounts)).to.be.revertedWith('Max amount can not exceed your balance');
+            await Promise.all(assets.map(async (asset) => {
+                // @ts-ignore
+                await expect(nabe.deposit(asset.address, depositAmount, collateralsAddresses, collateralsMaxAmounts)).to.be.revertedWith('Max amount can not exceed your balance');
+            }));
         });
     });
 });
