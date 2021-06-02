@@ -31,6 +31,13 @@ contract Nabe {
     function deposit(IERC20 _token, uint256 _amount, address[] calldata _collaterals, uint256[] calldata _maxAmounts) maxAmountDontExceedAmount(_amount, _maxAmounts) external {
         _token.safeTransferFrom(msg.sender, address(this), _amount);
         updateMaxAmountPerCollateral(address(_token), _collaterals, _maxAmounts);
+        userTokens[address(_token)][msg.sender] = userTokens[address(_token)][msg.sender].add(_amount);
+    }
+
+    function remove(IERC20 _token, uint256 _amount) external {
+        require(userTokens[address(_token)][msg.sender] >= _amount, '_amount can not be superior to the userToken amount');
+        _token.safeTransfer(msg.sender, _amount);
+        userTokens[address(_token)][msg.sender] = userTokens[address(_token)][msg.sender].sub(_amount);
     }
 
     //update maxAmount per collaterals
