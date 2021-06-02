@@ -41,4 +41,15 @@ describe("Nabe", function () {
             expect(await nabe.name()).to.equal('Nabe');
         });
     });
+
+    describe('Should deposit into Nabe', async function () {
+        it ('Should approve assets', async function () {
+            const [owner] = await hre.ethers.getSigners();
+            await Promise.all(assets.map(async (asset) => {
+                const totalSupply: number = await asset.totalSupply();
+                await asset.approve(nabe.address, totalSupply);
+                expect(await asset.allowance(owner.address, nabe.address)).to.equal(totalSupply);
+            }));
+        })
+    });
 });
