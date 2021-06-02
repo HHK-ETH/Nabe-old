@@ -8,7 +8,7 @@ describe("Nabe", function () {
     let collaterals: any[] = [];
     let nabe: any;
 
-    describe('Should deploy 2 assets & 2 collaterals as ERC20 & Nabe', async function () {
+    describe('Should deploy 2 assets ERC20 & 2 collaterals ERC20 & Nabe contract', async function () {
         it('Should deploy 2 assets', async function () {
             const ERC20Mock = await hre.ethers.getContractFactory('ERC20Mock');
             const assetA = await ERC20Mock.deploy(1_000_000_000);
@@ -43,13 +43,37 @@ describe("Nabe", function () {
     });
 
     describe('Should deposit into Nabe', async function () {
-        it ('Should approve assets', async function () {
+        it('Should approve assets', async function () {
             const [owner] = await hre.ethers.getSigners();
             await Promise.all(assets.map(async (asset) => {
                 const totalSupply: number = await asset.totalSupply();
                 await asset.approve(nabe.address, totalSupply);
                 expect(await asset.allowance(owner.address, nabe.address)).to.equal(totalSupply);
             }));
-        })
+        });
+
+        it('Should deposit asset and set a valid max for all collaterals', async function () {
+            const depositAmount: number = 100;
+            const collateralsAddresses = collaterals.map((collateral) => {
+                return collateral.address;
+            });
+            const collateralsMaxAmounts = collaterals.map(() => {
+                return 100; //equal to the deposit amount
+            });
+            await nabe.deposit(assets[0].address, depositAmount, collateralsAddresses, collateralsMaxAmounts);
+            expect(await nabe.tokens(assets[0].address, collateralsAddresses[0])).to.equal(depositAmount);
+        });
+
+        it('Should revert a deposit asset when setting an invalid max for all collaterals', async function () {
+            const depositAmount: number = 100;
+            const collateralsAddresses = collaterals.map((collateral) => {
+                return collateral.address;
+            });
+            const collateralsMaxAmounts = collaterals.map(() => {
+                return 1_000_000; //more than the deposits amount /!\
+            });
+            // @ts-ignore
+            await expect(nabe.deposit(assets[0].address, depositAmount, collateralsAddresses, collateralsMaxAmounts)).to.be.revertedWith('Max amount can not exceed your balance');
+        });
     });
 });
