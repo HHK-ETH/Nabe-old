@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/HHK-ETH/Nabe#readme",
   "devDependencies": {
+    "@boringcrypto/boring-solidity": "git+https://github.com/boringcrypto/BoringSolidity.git",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@sushiswap/bentobox-sdk": "git+https://github.com/sushiswap/bentobox-sdk.git",
     "@types/chai": "^4.2.18",
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.3.1",
@@ -27,8 +29,6 @@
     "ethers": "^5.1.4",
     "hardhat": "^2.3.0",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.4",
-    "@boringcrypto/boring-solidity": "git+https://github.com/boringcrypto/BoringSolidity.git",
-    "@sushiswap/bentobox-sdk": "git+https://github.com/sushiswap/bentobox-sdk.git"
+    "typescript": "^4.2.4"
   }
 }
