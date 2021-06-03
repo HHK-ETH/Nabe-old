@@ -13,5 +13,12 @@ task("accounts", "Prints the list of accounts", async (args, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 module.exports = {
   solidity: "0.6.12",
+  networks: {
+    hardhat: {
+      throwOnTransactionFailures: true,
+      throwOnCallFailures: true,
+      allowUnlimitedContractSize: true
+    }
+  }
 };
 
