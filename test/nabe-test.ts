@@ -20,7 +20,7 @@ describe("Nabe", function () {
             expect(await contracts.kashiMaster.bentoBox()).to.equal(contracts.bentoBox.address);
         });
         it('Should deploy Nabe', async function () {
-            expect(await contracts.nabe.name()).to.equal('Nabe');
+            expect(await contracts.nabe.bentoBox()).to.equal(contracts.bentoBox.address);
         });
     });
 
@@ -42,55 +42,74 @@ describe("Nabe", function () {
         });
     });
 
-    describe('Should deposit into Nabe', function () {
-        it('Should revert a deposit when not approved or superior to wallet balance', async function () {
-            const collateralsMaxAmounts = contracts.collaterals.map(() => {
-                return 100; //equal to the deposit amount
-            });
-            // @ts-ignore
-            await expect(contracts.nabe.deposit(contracts.assets[0].address, 100, contracts.getCollateralsAddresses(), collateralsMaxAmounts)).to.be.revertedWith('BoringERC20: TransferFrom failed');
-            // @ts-ignore
-            await expect(contracts.nabe.deposit(contracts.assets[0].address, 1_000_000_000_000, contracts.getCollateralsAddresses(), collateralsMaxAmounts)).to.be.revertedWith('BoringERC20: TransferFrom failed');
-        });
-
+    describe('Should deposit into bentoBox', function () {
         it('Should approve assets', async function () {
             await Promise.all(contracts.assets.map(async (asset) => {
                 const totalSupply: number = await asset.totalSupply();
-                await asset.approve(contracts.nabe.address, totalSupply);
-                expect(await asset.allowance(owner.address, contracts.nabe.address)).to.equal(totalSupply);
+                await asset.approve(contracts.bentoBox.address, totalSupply);
+                expect(await asset.allowance(owner.address, contracts.bentoBox.address)).to.equal(totalSupply);
+            }));
+        });
+
+        it('Should deposit all assets in the bentoBox', async function () {
+            await Promise.all(contracts.assets.map(async (asset) => {
+                const totalSupply = await asset.totalSupply();
+                await asset.approve(contracts.bentoBox.address, totalSupply);
+                await contracts.bentoBox.deposit(asset.address, owner.address, owner.address, totalSupply, 0);
+                expect(await contracts.bentoBox.toAmount(asset.address, await contracts.bentoBox.balanceOf(asset.address, owner.address), true)).to.equal(totalSupply);
+            }));
+        });
+    });
+
+    describe('Should deposit into Nabe', function () {
+        it('Should revert a deposit when Nabe not approved', async function () {
+            const collateralsMaxShares = contracts.collaterals.map(() => {
+                return 1000; //equal to the deposit share
+            });
+            const sharesToDeposit = await contracts.bentoBox.toShare(contracts.assets[0].address, 1000, true);
+            // @ts-ignore
+            await expect(contracts.nabe.deposit(contracts.assets[0].address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares)).to.be.revertedWith('BentoBox: Transfer not approved');
+        });
+
+        it('Should approve Nabe', async function () {
+            await contracts.bentoBox.whitelistMasterContract(contracts.nabe.address, true); //whitelist nabe but not needed if able to produce eip-712 signature in setMasterContractApproval
+            await contracts.bentoBox.setMasterContractApproval(owner.address, contracts.nabe.address, true, 0, "0x0000000000000000000000000000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000000000000000000000000000");
+            expect(await contracts.bentoBox.masterContractApproved(contracts.nabe.address, owner.address)).to.equal(true);
+        });
+
+        it('Should revert a deposit assets when setting an invalid max for all collaterals', async function () {
+            const depositShare: number = 1000;
+            const sharesToDeposit = await contracts.bentoBox.toShare(contracts.assets[0].address, depositShare, true);
+            const collateralsMaxShares = contracts.collaterals.map(() => {
+                return 1_000_000; //more than the deposited shares /!\
+            });
+            await Promise.all(contracts.assets.map(async (asset) => {
+                // @ts-ignore
+                await expect(contracts.nabe.deposit(asset.address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares)).to.be.revertedWith('Max share can not exceed your balance');
             }));
         });
 
         it('Should deposit assets and set a valid max for all collaterals', async function () {
-            const depositAmount: number = 100;
-            const collateralsMaxAmounts = contracts.collaterals.map(() => {
-                return 100; //equal to the deposit amount
+            const depositShare: number = 1000;
+            const sharesToDeposit = await contracts.bentoBox.toShare(contracts.assets[0].address, 1000, true);
+            const collateralsMaxShares = contracts.collaterals.map(() => {
+                return depositShare; //equal to the deposit share
             });
             await Promise.all(contracts.assets.map(async (asset) => {
-                await contracts.nabe.deposit(asset.address, depositAmount, contracts.getCollateralsAddresses(), collateralsMaxAmounts);
-                expect(await contracts.nabe.tokens(asset.address, contracts.getCollateralsAddresses()[0])).to.equal(depositAmount);
-            }));
-        });
-
-        it('Should revert a deposit assets when setting an invalid max for all collaterals', async function () {
-            const depositAmount: number = 100;
-            const collateralsMaxAmounts = contracts.collaterals.map(() => {
-                return 1_000_000; //more than the deposits amount /!\
-            });
-            await Promise.all(contracts.assets.map(async (asset) => {
-                // @ts-ignore
-                await expect(contracts.nabe.deposit(asset.address, depositAmount, contracts.getCollateralsAddresses(), collateralsMaxAmounts)).to.be.revertedWith('Max amount can not exceed your balance');
+                await contracts.nabe.deposit(asset.address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares);
+                expect(await contracts.nabe.tokens(asset.address, contracts.getCollateralsAddresses()[0])).to.equal(depositShare);
             }));
         });
     });
 
     describe('Should remove from Nabe', function () {
-        it('Should revert remove assets from Nabe when _amount superior to userToken balance', async function () {
+        /*
+        it('Should revert remove assets from Nabe when _share superior to userToken balance', async function () {
             // @ts-ignore
             await Promise.all(contracts.assets.map(async (asset) => {
                 const assetInNabe = await contracts.nabe.userTokens(asset.address, owner.address);
                 // @ts-ignore
-                await expect(contracts.nabe.remove(asset.address, assetInNabe + 1)).to.be.revertedWith('_amount can not be superior to the userToken amount');
+                await expect(contracts.nabe.remove(asset.address, assetInNabe + 1)).to.be.revertedWith('_share can not be superior to the userToken share');
             }));
         });
         it('Should remove assets from Nabe', async function () {
@@ -102,5 +121,6 @@ describe("Nabe", function () {
                 expect(await contracts.nabe.userTokens(asset.address, owner.address)).to.equal(0);
             }));
         });
+        */
     });
 });
