@@ -14,7 +14,7 @@ export class Deployer {
         if (Deployer.instance === undefined) {
             const bentoBox = await Deployer.deployBentoBox();
             const kashiMaster = await Deployer.deployKashiMaster(bentoBox);
-            const nabe = await Deployer.deployNabe();
+            const nabe = await Deployer.deployNabe(bentoBox, kashiMaster);
             Deployer.instance = new Deployer(bentoBox, kashiMaster, nabe);
         }
         return Deployer.instance;
@@ -46,9 +46,9 @@ export class Deployer {
         return kashiMaster;
     }
 
-    static async deployNabe(): Promise<any> {
+    static async deployNabe(bentoBox: any, kashiMaster: any): Promise<any> {
         const Nabe = await hre.ethers.getContractFactory('Nabe');
-        const nabe = await Nabe.deploy('Nabe');
+        const nabe = await Nabe.deploy(bentoBox.address, kashiMaster.address);
         await nabe.deployed();
         return nabe;
     }
