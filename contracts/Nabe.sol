@@ -27,7 +27,7 @@ contract Nabe {
 
     modifier maxShareDontExceedShare(uint256 _share, uint256[] calldata _maxShares) {
         for (uint256 i = 0; i < _maxShares.length; i += 1) {
-            require(_share >= _maxShares[i], 'Max share can not exceed your balance');
+            require(_share >= _maxShares[i], 'Nabe: Max share can not exceed your balance');
         }
         _;
     }
@@ -42,7 +42,7 @@ contract Nabe {
 
     //remove asset from Nabe
     function remove(IERC20 _token, uint256 _share) external {
-        require(userTokens[address(_token)][msg.sender] >= _share, '_share can not be superior to the userToken share');
+        require(userTokens[address(_token)][msg.sender] >= _share, 'Nabe: _share can not be superior to the userToken share');
         bentoBox.transfer(_token, address(this), msg.sender, _share);
         userTokens[address(_token)][msg.sender] = userTokens[address(_token)][msg.sender].sub(_share);
     }
