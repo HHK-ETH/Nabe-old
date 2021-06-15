@@ -1,3 +1,5 @@
+import {ethers} from "ethers";
+
 const hre = require("hardhat");
 
 export class Deployer {
@@ -70,9 +72,15 @@ export class Deployer {
         return erc20;
     }
 
-    public getCollateralsAddresses() {
-        return this.collaterals.map((collateral) => {
-            return collateral.address;
+    async deployKashiPair(asset: any, collateral: any, oracle: any): Promise<void> {
+        const data = hre.ethers.utils.defaultAbiCoder.encode(['address', 'address', 'address', 'bytes'], [collateral.address, asset.address, oracle.address, await oracle.getDataParameter()]);
+        //@ts-ignore
+        await this.bentoBox.deploy(this.kashiMaster.address, data, true);
+    }
+
+    public static getContractAddresses(contracts: any[]) {
+        return contracts.map((contract) => {
+            return contract.address;
         });
     }
 }
