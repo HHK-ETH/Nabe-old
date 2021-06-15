@@ -4,6 +4,7 @@ export class Deployer {
     public bentoBox: any;
     public kashiMaster: any;
     public nabe: any;
+    public oracle: any;
     public assets: any[];
     public collaterals: any[];
     public kashiPairs: any[];
@@ -15,15 +16,17 @@ export class Deployer {
             const bentoBox = await Deployer.deployBentoBox();
             const kashiMaster = await Deployer.deployKashiMaster(bentoBox);
             const nabe = await Deployer.deployNabe(bentoBox, kashiMaster);
-            Deployer.instance = new Deployer(bentoBox, kashiMaster, nabe);
+            const oracle = await Deployer.deployOracle();
+            Deployer.instance = new Deployer(bentoBox, kashiMaster, nabe, oracle);
         }
         return Deployer.instance;
     }
 
-    private constructor(bentobox: any, kashiMaster: any, nabe: any) {
+    private constructor(bentobox: any, kashiMaster: any, nabe: any, oracle: any) {
         this.bentoBox = bentobox;
         this.kashiMaster = kashiMaster;
         this.nabe = nabe;
+        this.oracle = oracle;
         this.assets = [];
         this.collaterals = [];
         this.kashiPairs = [];
@@ -51,6 +54,13 @@ export class Deployer {
         const nabe = await Nabe.deploy(bentoBox.address, kashiMaster.address);
         await nabe.deployed();
         return nabe;
+    }
+
+    static async deployOracle(): Promise<any> {
+        const Oracle = await hre.ethers.getContractFactory('OracleMock');
+        const oracle = await Oracle.deploy();
+        await oracle.deployed();
+        return oracle;
     }
 
     static async deployERC20Mock(totalSupply: number): Promise<any> {
