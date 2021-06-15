@@ -17,7 +17,7 @@ contract Nabe {
     //asset => user => share
     mapping (address => mapping (address => uint256)) public userTokens;
 
-    //asset => collateral => maxshare
+    //asset => kashiPair => maxShare
     mapping (address => mapping (address => uint)) public tokens;
 
     constructor(IBentoBoxV1 _bentoBox, IKashiPair _kashiMaster) public {
@@ -33,10 +33,10 @@ contract Nabe {
     }
 
     //Deposit token and update max share per collateral
-    function deposit(IERC20 _token, uint256 _share, address[] calldata _collaterals, uint256[] calldata _maxShares) maxShareDontExceedShare(_share, _maxShares) external {
+    function deposit(IERC20 _token, uint256 _share, address[] calldata _kashiPairs, uint256[] calldata _maxShares) maxShareDontExceedShare(_share, _maxShares) external {
         bentoBox.registerProtocol();
         bentoBox.transfer(_token, msg.sender, address(this), _share);
-        updateMaxSharePerCollateral(address(_token), _collaterals, _maxShares);
+        updateMaxSharePerKashiPair(address(_token), _kashiPairs, _maxShares);
         userTokens[address(_token)][msg.sender] = userTokens[address(_token)][msg.sender].add(_share);
     }
 
@@ -48,18 +48,16 @@ contract Nabe {
     }
 
     //update maxShare per collaterals
-    function updateMaxSharePerCollateral(address _token, address[] calldata _collaterals, uint256[] calldata _maxShares) private {
-        for (uint256 i = 0; i < _collaterals.length; i += 1) {
-            tokens[_token][_collaterals[i]] = tokens[_token][_collaterals[i]].add(_maxShares[i]);
+    function updateMaxSharePerKashiPair(address _token, address[] calldata _kashiPairs, uint256[] calldata _maxShares) private {
+        for (uint256 i = 0; i < _kashiPairs.length; i += 1) {
+            tokens[_token][_kashiPairs[i]] = tokens[_token][_kashiPairs[i]].add(_maxShares[i]);
         }
     }
 
-    //todo check if kashiPair is a legit one
     function addInPair(IKashiPair pair, uint256 _share) external {
         pair.addAsset(address(this), false, _share);
     }
 
-    //todo check if kashiPair is a legit one
     function removeFromPair(IKashiPair pair, uint256 _fraction) external {
         pair.removeAsset(address(this), _fraction);
     }
