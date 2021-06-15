@@ -12,7 +12,7 @@ describe("Nabe", function () {
         [owner] = await hre.ethers.getSigners();
     });
 
-    describe('Should deploy BentoBox, KashiMaster & Nabe', function () {
+    describe('Deploy BentoBox, KashiMaster & Nabe', function () {
         it('Should deploy BentoBox', async function () {
             expect(await contracts.bentoBox.owner()).to.equal(owner.address);
         });
@@ -24,7 +24,7 @@ describe("Nabe", function () {
         });
     });
 
-    describe('Should deploy few ERC20', function () {
+    describe('Deploy ERC20', function () {
         it('Should deploy 2 assets as ERC20', async function () {
             contracts.assets.push(await Deployer.deployERC20Mock(1_000_000_000));
             contracts.assets.push(await Deployer.deployERC20Mock(1_000_000_000_000));
@@ -42,7 +42,7 @@ describe("Nabe", function () {
         });
     });
 
-    describe('Should deposit into bentoBox', function () {
+    describe('Deposit assets into bentoBox', function () {
         it('Should approve assets', async function () {
             await Promise.all(contracts.assets.map(async (asset) => {
                 const totalSupply: number = await asset.totalSupply();
@@ -61,7 +61,7 @@ describe("Nabe", function () {
         });
     });
 
-    describe('Should deposit into Nabe', function () {
+    describe('Deposit assets into Nabe', function () {
         it('Should revert a deposit when Nabe not approved', async function () {
             const collateralsMaxShares = contracts.collaterals.map(() => {
                 return 1000; //equal to the deposit share
@@ -85,7 +85,7 @@ describe("Nabe", function () {
             });
             await Promise.all(contracts.assets.map(async (asset) => {
                 // @ts-ignore
-                await expect(contracts.nabe.deposit(asset.address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares)).to.be.revertedWith('Max share can not exceed your balance');
+                await expect(contracts.nabe.deposit(asset.address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares)).to.be.revertedWith('Nabe: Max share can not exceed your balance');
             }));
         });
 
@@ -102,17 +102,16 @@ describe("Nabe", function () {
         });
     });
 
-    describe('Should remove from Nabe', function () {
-        /*
+    describe('Remove assets from Nabe', function () {
         it('Should revert remove assets from Nabe when _share superior to userToken balance', async function () {
             // @ts-ignore
             await Promise.all(contracts.assets.map(async (asset) => {
                 const assetInNabe = await contracts.nabe.userTokens(asset.address, owner.address);
                 // @ts-ignore
-                await expect(contracts.nabe.remove(asset.address, assetInNabe + 1)).to.be.revertedWith('_share can not be superior to the userToken share');
+                await expect(contracts.nabe.remove(asset.address, assetInNabe + 1)).to.be.revertedWith('Nabe: _share can not be superior to the userToken share');
             }));
         });
-        it('Should remove assets from Nabe', async function () {
+        it('Should remove all assets from Nabe', async function () {
             await Promise.all(contracts.assets.map(async (asset) => {
                 const assetInNabe = await contracts.nabe.userTokens(asset.address, owner.address);
 
@@ -121,6 +120,5 @@ describe("Nabe", function () {
                 expect(await contracts.nabe.userTokens(asset.address, owner.address)).to.equal(0);
             }));
         });
-        */
     });
 });
