@@ -1,5 +1,6 @@
 import {expect} from "chai";
 import {Deployer} from "./utils/deployer";
+import {ethers} from "ethers";
 
 const hre = require("hardhat");
 
@@ -12,7 +13,7 @@ describe("Nabe", function () {
         [owner] = await hre.ethers.getSigners();
     });
 
-    describe('Deploy BentoBox, KashiMaster & Nabe', function () {
+    describe('Deploy BentoBox, KashiMaster & Nabe & Oracle', function () {
         it('Should deploy BentoBox', async function () {
             expect(await contracts.bentoBox.owner()).to.equal(owner.address);
         });
@@ -21,6 +22,9 @@ describe("Nabe", function () {
         });
         it('Should deploy Nabe', async function () {
             expect(await contracts.nabe.bentoBox()).to.equal(contracts.bentoBox.address);
+        });
+        it('should deploy OracleMock', async function () {
+            expect(await contracts.oracle.symbol(await contracts.oracle.getDataParameter())).to.equal('TEST');
         });
     });
 
@@ -39,6 +43,26 @@ describe("Nabe", function () {
 
             expect(await contracts.collaterals[0].totalSupply()).to.equal(1_000_000_000);
             expect(await contracts.collaterals[1].totalSupply()).to.equal(1_000_000_000_000);
+        });
+    });
+
+    describe('Deploy kashi pairs', function () {
+        it('Should deploy kashi pairs for each assets and collaterals', async function () {
+            //todo make this test cleaner
+            await Promise.all(contracts.assets.map(async (asset) => {
+                await Promise.all(contracts.collaterals.map(async (collateral) => {
+                    await contracts.deployKashiPair(asset, collateral, contracts.oracle);
+                }));
+            }));
+
+            const kashiAddresses: ethers.Event[] = await contracts.bentoBox.queryFilter(await contracts.bentoBox.filters.LogDeploy(contracts.kashiMaster.address));
+            //todo fix logs order
+            await Promise.all(kashiAddresses.map(async (log: any) => {
+                const newPair = await hre.ethers.getContractFactory('KashiPair');
+                contracts.kashiPairs.push(newPair.attach(log.args.cloneAddress));
+            }));
+
+            expect(await contracts.kashiPairs[0].asset()).to.equal(contracts.assets[0].address);
         });
     });
 
@@ -68,7 +92,7 @@ describe("Nabe", function () {
             });
             const sharesToDeposit = await contracts.bentoBox.toShare(contracts.assets[0].address, 1000, true);
             // @ts-ignore
-            await expect(contracts.nabe.deposit(contracts.assets[0].address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares)).to.be.revertedWith('BentoBox: Transfer not approved');
+            await expect(contracts.nabe.deposit(contracts.assets[0].address, sharesToDeposit, Deployer.getContractAddresses(contracts.collaterals), collateralsMaxShares)).to.be.revertedWith('BentoBox: Transfer not approved');
         });
 
         it('Should approve Nabe', async function () {
@@ -85,20 +109,21 @@ describe("Nabe", function () {
             });
             await Promise.all(contracts.assets.map(async (asset) => {
                 // @ts-ignore
-                await expect(contracts.nabe.deposit(asset.address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares)).to.be.revertedWith('Nabe: Max share can not exceed your balance');
+                await expect(contracts.nabe.deposit(asset.address, sharesToDeposit, Deployer.getContractAddresses(contracts.collaterals), collateralsMaxShares)).to.be.revertedWith('Nabe: Max share can not exceed your balance');
             }));
         });
 
-        it('Should deposit assets and set a valid max for all collaterals', async function () {
+        it('Should deposit assets and set a valid max for all kashiPairs', async function () {
             const depositShare: number = 1000;
             const sharesToDeposit = await contracts.bentoBox.toShare(contracts.assets[0].address, 1000, true);
             const collateralsMaxShares = contracts.collaterals.map(() => {
                 return depositShare; //equal to the deposit share
             });
-            await Promise.all(contracts.assets.map(async (asset) => {
-                await contracts.nabe.deposit(asset.address, sharesToDeposit, contracts.getCollateralsAddresses(), collateralsMaxShares);
-                expect(await contracts.nabe.tokens(asset.address, contracts.getCollateralsAddresses()[0])).to.equal(depositShare);
-            }));
+
+            await contracts.nabe.deposit(contracts.assets[0].address, sharesToDeposit, Deployer.getContractAddresses([contracts.kashiPairs[0], contracts.kashiPairs[1]]), collateralsMaxShares);
+            await contracts.nabe.deposit(contracts.assets[1].address, sharesToDeposit, Deployer.getContractAddresses([contracts.kashiPairs[2], contracts.kashiPairs[3]]), collateralsMaxShares);
+            expect(await contracts.nabe.tokens(contracts.assets[0].address, Deployer.getContractAddresses([contracts.kashiPairs[0]])[0])).to.equal(depositShare);
+            expect(await contracts.nabe.tokens(contracts.assets[1].address, Deployer.getContractAddresses([contracts.kashiPairs[2]])[0])).to.equal(depositShare);
         });
     });
 
