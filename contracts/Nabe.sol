@@ -33,7 +33,7 @@ contract Nabe {
     }
 
     //Deposit token and update max share per collateral
-    function deposit(IERC20 _token, uint256 _share, address[] calldata _kashiPairs, uint256[] calldata _maxShares) maxShareDontExceedShare(_share, _maxShares) external {
+    function deposit(IERC20 _token, uint256 _share, IKashiPair[] calldata _kashiPairs, uint256[] calldata _maxShares) maxShareDontExceedShare(_share, _maxShares) external {
         bentoBox.registerProtocol();
         bentoBox.transfer(_token, msg.sender, address(this), _share);
         updateMaxSharePerKashiPair(address(_token), _kashiPairs, _maxShares);
@@ -48,9 +48,10 @@ contract Nabe {
     }
 
     //update maxShare per collaterals
-    function updateMaxSharePerKashiPair(address _token, address[] calldata _kashiPairs, uint256[] calldata _maxShares) private {
+    function updateMaxSharePerKashiPair(address _token, IKashiPair[] calldata _kashiPairs, uint256[] calldata _maxShares) private {
         for (uint256 i = 0; i < _kashiPairs.length; i += 1) {
-            tokens[_token][_kashiPairs[i]] = tokens[_token][_kashiPairs[i]].add(_maxShares[i]);
+            require(address(_kashiPairs[i].asset()) == _token, 'Nabe: _kashiPair.asset() and deposited _token must be the same');
+            tokens[_token][address(_kashiPairs[i])] = tokens[_token][address(_kashiPairs[i])].add(_maxShares[i]);
         }
     }
 
