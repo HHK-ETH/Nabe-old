@@ -48,21 +48,22 @@ describe("Nabe", function () {
 
     describe('Deploy kashi pairs', function () {
         it('Should deploy kashi pairs for each assets and collaterals', async function () {
-            //todo make this test cleaner
-            await Promise.all(contracts.assets.map(async (asset) => {
-                await Promise.all(contracts.collaterals.map(async (collateral) => {
-                    await contracts.deployKashiPair(asset, collateral, contracts.oracle);
-                }));
-            }));
-
+            //todo add loop
+            await contracts.deployKashiPair(contracts.assets[0], contracts.collaterals[0], contracts.oracle);
+            await contracts.deployKashiPair(contracts.assets[0], contracts.collaterals[1], contracts.oracle);
+            await contracts.deployKashiPair(contracts.assets[1], contracts.collaterals[0], contracts.oracle);
+            await contracts.deployKashiPair(contracts.assets[1], contracts.collaterals[1], contracts.oracle);
+            
             const kashiAddresses: ethers.Event[] = await contracts.bentoBox.queryFilter(await contracts.bentoBox.filters.LogDeploy(contracts.kashiMaster.address));
-            //todo fix logs order
             await Promise.all(kashiAddresses.map(async (log: any) => {
                 const newPair = await hre.ethers.getContractFactory('KashiPair');
                 contracts.kashiPairs.push(newPair.attach(log.args.cloneAddress));
             }));
 
             expect(await contracts.kashiPairs[0].asset()).to.equal(contracts.assets[0].address);
+            expect(await contracts.kashiPairs[1].asset()).to.equal(contracts.assets[0].address);
+            expect(await contracts.kashiPairs[2].asset()).to.equal(contracts.assets[1].address);
+            expect(await contracts.kashiPairs[3].asset()).to.equal(contracts.assets[1].address);
         });
     });
 
@@ -122,8 +123,11 @@ describe("Nabe", function () {
 
             await contracts.nabe.deposit(contracts.assets[0].address, sharesToDeposit, Deployer.getContractAddresses([contracts.kashiPairs[0], contracts.kashiPairs[1]]), collateralsMaxShares);
             await contracts.nabe.deposit(contracts.assets[1].address, sharesToDeposit, Deployer.getContractAddresses([contracts.kashiPairs[2], contracts.kashiPairs[3]]), collateralsMaxShares);
+            //todo add loop
             expect(await contracts.nabe.tokens(contracts.assets[0].address, Deployer.getContractAddresses([contracts.kashiPairs[0]])[0])).to.equal(depositShare);
+            expect(await contracts.nabe.tokens(contracts.assets[0].address, Deployer.getContractAddresses([contracts.kashiPairs[1]])[0])).to.equal(depositShare);
             expect(await contracts.nabe.tokens(contracts.assets[1].address, Deployer.getContractAddresses([contracts.kashiPairs[2]])[0])).to.equal(depositShare);
+            expect(await contracts.nabe.tokens(contracts.assets[1].address, Deployer.getContractAddresses([contracts.kashiPairs[3]])[0])).to.equal(depositShare);
         });
     });
 
