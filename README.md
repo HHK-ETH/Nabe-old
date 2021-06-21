@@ -45,8 +45,7 @@ If the new allocation don't respect your users ones, Nabe will refuse it !
 
 ## Diagram
 
-![Nabe](https://user-images.githubusercontent.com/80489471/119029658-34b7bb80-b9a9-11eb-806a-a8ec945dc0d8.png)
-
+<img width="1148" alt="Capture d’écran 2021-06-21 à 15 43 28" src="https://user-images.githubusercontent.com/80489471/122773487-4072f800-d25d-11eb-845e-8b375cf4c2f1.png">
 
 
 
